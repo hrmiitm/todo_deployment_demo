@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Taskly{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:      #1a1a2e;
+      --ink-soft: #4a4a6a;
+      --paper:    #fafaf7;
+      --card:     #ffffff;
+      --border:   #e8e8f0;
+      --accent:   #6c47ff;
+      --accent-light: #ede8ff;
+      --green:    #22c55e;
+      --red:      #ef4444;
+      --amber:    #f59e0b;
+      --radius:   14px;
+      --shadow:   0 2px 16px rgba(108,71,255,.08);
+      --shadow-md:0 8px 32px rgba(108,71,255,.13);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    h1,h2,h3 { font-family: 'DM Serif Display', serif; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Navbar ── */
+    nav {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 62px;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-brand {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--accent);
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .nav-brand span { font-size: 1.3rem; }
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+    .nav-links a { color: var(--ink-soft); font-weight: 500; font-size: .95rem; }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .btn-nav {
+      background: var(--accent);
+      color: #fff !important;
+      padding: .4rem 1.1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .88rem;
+      transition: opacity .2s;
+    }
+    .btn-nav:hover { opacity: .85; }
+
+    /* ── Flash messages ── */
+    .flash-wrap { max-width: 680px; margin: 1.2rem auto 0; padding: 0 1.5rem; }
+    .flash {
+      padding: .75rem 1.2rem;
+      border-radius: var(--radius);
+      font-size: .9rem;
+      font-weight: 500;
+      margin-bottom: .5rem;
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .flash.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .flash.error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .flash.info    { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .flash.warning { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .6rem 1.3rem;
+      border-radius: 999px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 600;
+      border: none; cursor: pointer;
+      transition: all .2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { opacity: .88; transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .btn-ghost { background: transparent; color: var(--ink-soft); border: 1.5px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: #fee2e2; color: var(--red); }
+    .btn-danger:hover { background: var(--red); color: #fff; }
+    .btn-sm { padding: .35rem .85rem; font-size: .82rem; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* ── Form fields ── */
+    label { font-size: .85rem; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: .3rem; }
+    input[type=text], input[type=email], input[type=password],
+    textarea, select {
+      width: 100%;
+      padding: .7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      color: var(--ink);
+      background: var(--paper);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    .form-group { margin-bottom: 1.1rem; }
+
+    /* ── Priority badge ── */
+    .badge {
+      display: inline-block;
+      padding: .2rem .65rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .badge-high   { background: #fee2e2; color: #b91c1c; }
+    .badge-medium { background: #fef3c7; color: #92400e; }
+    .badge-low    { background: #dcfce7; color: #166534; }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--ink-soft);
+      font-size: .82rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+  </style>
+  {% block extra_styles %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand"><span>✦</span> Taskly</div>
+  <div class="nav-links">
+    {% if session.user_id %}
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <span style="color:var(--border)">|</span>
+      <span style="color:var(--ink-soft); font-size:.9rem;">👤 {{ session.username }}</span>
+      <a href="{{ url_for('logout') }}" class="btn-nav">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('register') }}" class="btn-nav">Sign Up</a>
+    {% endif %}
+  </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-wrap">
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">
+          {% if cat == 'success' %}✅{% elif cat == 'error' %}❌{% elif cat == 'info' %}ℹ️{% else %}⚠️{% endif %}
+          {{ msg }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<footer>
+  Made with ☕ &amp; Flask &nbsp;·&nbsp; Taskly © 2025
+</footer>
+
+</body>
+</html>

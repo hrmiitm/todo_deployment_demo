@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Taskly{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .page { max-width: 780px; margin: 0 auto; padding: 2.4rem 1.5rem 4rem; }
+
+  /* ── Page header ── */
+  .page-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 1.8rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .page-header h1 { font-size: 2.2rem; line-height: 1.15; }
+  .page-header p  { color: var(--ink-soft); font-size: .95rem; margin-top: .2rem; }
+
+  /* ── Stats row ── */
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .stat-card {
+    padding: 1.1rem 1.4rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card);
+    text-align: center;
+  }
+  .stat-card .num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem; color: var(--accent);
+  }
+  .stat-card .lbl { font-size: .8rem; color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ── Add task form ── */
+  .add-card {
+    padding: 1.6rem;
+    border-radius: var(--radius);
+    border: 2px dashed var(--border);
+    background: var(--card);
+    margin-bottom: 2rem;
+    transition: border-color .2s;
+  }
+  .add-card:focus-within { border-color: var(--accent); border-style: solid; }
+  .add-card h2 { font-size: 1.1rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: .5rem; }
+  .add-row { display: grid; grid-template-columns: 1fr auto; gap: .8rem; align-items: flex-start; }
+  .add-row .fields { display: flex; flex-direction: column; gap: .7rem; width: 100%; }
+  .add-row .row2 { display: grid; grid-template-columns: 1fr auto; gap: .7rem; }
+
+  /* ── Filter tabs ── */
+  .filter-bar {
+    display: flex; gap: .5rem; margin-bottom: 1.4rem;
+    border-bottom: 1.5px solid var(--border);
+    padding-bottom: .8rem;
+  }
+  .filter-tab {
+    padding: .38rem .95rem;
+    border-radius: 999px;
+    font-size: .88rem; font-weight: 600;
+    color: var(--ink-soft); background: transparent;
+    border: 1.5px solid transparent;
+    cursor: pointer; text-decoration: none;
+    transition: all .18s;
+  }
+  .filter-tab:hover { color: var(--accent); border-color: var(--accent-light); text-decoration: none; }
+  .filter-tab.active { background: var(--accent-light); color: var(--accent); border-color: transparent; }
+
+  /* ── Todo list ── */
+  .todo-list { display: flex; flex-direction: column; gap: .7rem; }
+
+  .todo-item {
+    display: flex; align-items: flex-start; gap: 1rem;
+    padding: 1.1rem 1.3rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: var(--shadow);
+    transition: box-shadow .2s, transform .15s;
+    animation: fadeIn .3s ease both;
+  }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+  .todo-item:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+  .todo-item.done-item { opacity: .6; }
+  .todo-item.done-item .todo-title { text-decoration: line-through; color: var(--ink-soft); }
+
+  .todo-check {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; margin-top: .15rem;
+    transition: all .18s;
+    text-decoration: none; font-size: .85rem;
+    background: transparent;
+  }
+  .todo-check:hover { border-color: var(--accent); background: var(--accent-light); }
+  .todo-check.checked { background: var(--green); border-color: var(--green); color: #fff; }
+
+  .todo-body { flex: 1; min-width: 0; }
+  .todo-title { font-weight: 600; font-size: .97rem; color: var(--ink); }
+  .todo-desc  { font-size: .83rem; color: var(--ink-soft); margin-top: .2rem; white-space: pre-wrap; }
+  .todo-meta  { display: flex; align-items: center; gap: .6rem; margin-top: .55rem; flex-wrap: wrap; }
+  .todo-date  { font-size: .75rem; color: var(--ink-soft); }
+
+  .todo-actions { display: flex; gap: .4rem; align-items: center; margin-left: auto; }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center; padding: 3.5rem 1rem;
+    color: var(--ink-soft);
+  }
+  .empty .emoji { font-size: 3rem; margin-bottom: .8rem; }
+  .empty p { font-size: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h1>Your Tasks ✦</h1>
+      <p>Stay on top of everything, one task at a time.</p>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num">{{ total }}</div>
+      <div class="lbl">Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color:#f59e0b;">{{ active }}</div>
+      <div class="lbl">Active</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" style="color:#22c55e;">{{ done_count }}</div>
+      <div class="lbl">Done</div>
+    </div>
+  </div>
+
+  <!-- Add Task Form -->
+  <div class="add-card">
+    <h2>➕ Add a new task</h2>
+    <form method="POST" action="{{ url_for('add_todo') }}">
+      <div class="form-group" style="margin-bottom:.7rem;">
+        <input type="text" name="title" placeholder="What needs to be done?" required />
+      </div>
+      <div class="add-row">
+        <div class="fields">
+          <textarea name="description" placeholder="Add a note (optional)" rows="2"></textarea>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.6rem;align-items:flex-end;">
+          <select name="priority" style="width:130px;">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟡 Medium</option>
+            <option value="high">🔴 High</option>
+          </select>
+          <button type="submit" class="btn btn-primary" style="white-space:nowrap;">Add Task</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-bar">
+    <a href="{{ url_for('dashboard', filter='all') }}"    class="filter-tab {% if filter_by=='all'    %}active{% endif %}">All ({{ total }})</a>
+    <a href="{{ url_for('dashboard', filter='active') }}" class="filter-tab {% if filter_by=='active' %}active{% endif %}">Active ({{ active }})</a>
+    <a href="{{ url_for('dashboard', filter='done') }}"   class="filter-tab {% if filter_by=='done'   %}active{% endif %}">Done ({{ done_count }})</a>
+  </div>
+
+  <!-- Todo List -->
+  {% if todos %}
+    <div class="todo-list">
+      {% for todo in todos %}
+        <div class="todo-item {% if todo.done %}done-item{% endif %}">
+
+          <!-- Check / Uncheck -->
+          <a href="{{ url_for('toggle_todo', todo_id=todo.id, filter=filter_by) }}"
+             class="todo-check {% if todo.done %}checked{% endif %}"
+             title="{% if todo.done %}Mark incomplete{% else %}Mark done{% endif %}">
+            {% if todo.done %}✓{% endif %}
+          </a>
+
+          <div class="todo-body">
+            <div class="todo-title">{{ todo.title }}</div>
+            {% if todo.description %}
+              <div class="todo-desc">{{ todo.description }}</div>
+            {% endif %}
+            <div class="todo-meta">
+              <span class="badge badge-{{ todo.priority }}">{{ todo.priority }}</span>
+              <span class="todo-date">🗓 {{ todo.created.strftime('%d %b %Y') }}</span>
+            </div>
+          </div>
+
+          <div class="todo-actions">
+            <a href="{{ url_for('edit_todo', todo_id=todo.id) }}" class="btn btn-ghost btn-sm" title="Edit">✏️ Edit</a>
+            <a href="{{ url_for('delete_todo', todo_id=todo.id, filter=filter_by) }}"
+               class="btn btn-danger btn-sm"
+               title="Delete"
+               onclick="return confirm('Delete this task?')">🗑</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">
+      <div class="emoji">
+        {% if filter_by == 'done' %}🎉{% elif filter_by == 'active' %}☀️{% else %}📋{% endif %}
+      </div>
+      <p>
+        {% if filter_by == 'done' %}No completed tasks yet. Keep going!
+        {% elif filter_by == 'active' %}No active tasks — you're all caught up!
+        {% else %}No tasks yet. Add your first one above!{% endif %}
+      </p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

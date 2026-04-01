@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Register · Taskly{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 120px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .auth-card {
+    width: 100%; max-width: 440px;
+    padding: 2.8rem 2.4rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    box-shadow: 0 16px 48px rgba(108,71,255,.1);
+    animation: slideUp .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes slideUp {
+    from { opacity:0; transform:translateY(24px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  .auth-header { text-align: center; margin-bottom: 2rem; }
+  .auth-logo {
+    width: 56px; height: 56px;
+    background: var(--accent-light);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin: 0 auto 1rem;
+  }
+  .auth-header h1 { font-size: 1.9rem; color: var(--ink); }
+  .auth-header p  { color: var(--ink-soft); font-size: .92rem; margin-top: .3rem; }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 1.4rem;
+    font-size: .9rem;
+    color: var(--ink-soft);
+  }
+  .auth-footer a { font-weight: 600; color: var(--accent); }
+
+  .input-icon { position: relative; }
+  .input-icon .icon {
+    position: absolute; left: .9rem; top: 50%; transform: translateY(-50%);
+    color: var(--ink-soft); font-size: 1rem; pointer-events: none;
+  }
+  .input-icon input { padding-left: 2.4rem; }
+  .hint { font-size: .78rem; color: var(--ink-soft); margin-top: .25rem; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.4rem 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo">🚀</div>
+      <h1>Create account</h1>
+      <p>Start organising your life today</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <div class="input-icon">
+          <span class="icon">👤</span>
+          <input type="text" id="username" name="username" placeholder="pick a username" required autocomplete="username" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <div class="input-icon">
+          <span class="icon">📧</span>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-icon">
+          <span class="icon">🔒</span>
+          <input type="password" id="password" name="password" placeholder="min 6 characters" required autocomplete="new-password" />
+        </div>
+        <p class="hint">At least 6 characters long</p>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:.8rem; font-size:1rem; margin-top:.4rem;">
+        Create Account →
+      </button>
+    </form>
+
+    <hr class="divider">
+    <div class="auth-footer">
+      Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
